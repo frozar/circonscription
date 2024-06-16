@@ -23,9 +23,7 @@ const App: Component = () => {
     }).addTo(mymap);
 
     const geoJson = await (
-      await fetch(
-        "http://localhost:3000/circonscriptions_legislatives_030522.json"
-      )
+      await fetch("/circonscriptions_legislatives_030522.json")
     ).json();
 
     console.log(geoJson);
