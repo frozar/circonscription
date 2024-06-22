@@ -33,11 +33,7 @@ async function initialiseMap() {
   });
 
   geoJsonLayer.bindPopup(function (layer) {
-    return (
-      <a href="http://www.google.com" target="_blank">
-        {layer.feature.properties.libelle}
-      </a>
-    );
+    return <p>{layer.feature.properties.libelle}</p>;
   });
 
   geoJsonLayer.addTo(mymap);
