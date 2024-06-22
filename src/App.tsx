@@ -7,6 +7,7 @@ import { GeoJsonObject } from "geojson";
 
 // TODO: display legend on map
 // TODO: add a handler on space stroke to recompute the legend colors
+// TODO: use the localstorage to store the legend
 
 async function drawCirconscriptionArea(
   mymap: Map,
@@ -24,7 +25,7 @@ async function drawCirconscriptionArea(
 
       return {
         ...{
-          weight: 5,
+          weight: 2,
           // TODO: add a slider to ajust opacity
           opacity: 0.75,
         },
@@ -64,6 +65,10 @@ function generateRandomHexColor() {
   return hexColor;
 }
 
+type LayerIdCircoType = string;
+
+const layerToDepute: { [key: LayerIdCircoType]: DeputeType } = {};
+
 function findLayerDepute(
   featureProperties: { id_circo: string; dep: string },
   deputes: DeputesType
@@ -72,23 +77,27 @@ function findLayerDepute(
 
   const layerNumCirco = +layerIdCirco.replace(layerNumDep, "");
 
-  // console.log("layerIdCirco", layerIdCirco);
-  // console.log("layerNumCirco", layerNumCirco);
+  const candidateDepute = layerToDepute[layerIdCirco];
 
-  let resDepute;
-  for (const depItem of deputes) {
-    // console.log("depItem.depute", depItem.depute);
-    const { num_deptmt, num_circo } = depItem.depute;
-    // console.log("num_deptmt", num_deptmt);
-    // console.log("num_circo", num_circo);
-    if (num_deptmt === layerNumDep && num_circo === layerNumCirco) {
-      console.log("res", depItem.depute);
-      resDepute = depItem.depute;
-      break;
+  if (candidateDepute) {
+    return candidateDepute;
+  } else {
+    let resDepute;
+    for (const depItem of deputes) {
+      // console.log("depItem.depute", depItem.depute);
+      const { num_deptmt, num_circo } = depItem.depute;
+      // console.log("num_deptmt", num_deptmt);
+      // console.log("num_circo", num_circo);
+      if (num_deptmt === layerNumDep && num_circo === layerNumCirco) {
+        // console.log("res", depItem.depute);
+        resDepute = depItem.depute;
+        layerToDepute[layerIdCirco] = resDepute;
+        break;
+      }
     }
-  }
 
-  return resDepute;
+    return resDepute;
+  }
 }
 
 function computeLegend(
