@@ -1,9 +1,51 @@
-.menuBurgerContainer {
+.sideMenuRoot {
+  --menu-burger-height: 50px;
+}
+
+.sideMenuBackground {
+  background: #fff0;
+}
+
+.sideMenuContent {
+  composes: sideMenuBackground;
+  height: 100vh;
+  width: 0px;
   z-index: 9999;
-  display: flex;
-  position: fixed;
+  position: relative;
+  transition: width 0.2s;
+}
+
+.sideMenuContentOpened {
+  composes: sideMenuContent;
+  width: 300px;
+  /* background: #aaa; */
+}
+
+.menuBurgerContainer {
+  composes: sideMenuBackground;
+  /* display: block; */
+  z-index: 9999;
+  position: absolute;
   top: 0;
-  background: #666;
-  height: 50px;
+  right: -50px;
+  height: var(--menu-burger-height);
   width: 50px;
+  display: flex;
+  justify-content: flex-end;
+  transition: all 0.2s;
+}
+
+.menuBurgerContainerOpened {
+  composes: menuBurgerContainer;
+  right: 0;
+  width: 100%;
+  background: #fff0;
+}
+
+.menuControlContainer {
+  overflow: hidden;
+}
+
+.menuControlInner {
+  margin-top: calc(var(--menu-burger-height) + 20px);
 }

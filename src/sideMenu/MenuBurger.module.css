@@ -1,3 +1,20 @@
+.menuBurgerButton {
+  width: 50px;
+  /* background: #666;
+  border-radius: 9999px;
+  border: 1px solid black; */
+  background: #333a;
+  transition: all 0.2s;
+}
+
+.menuBurgerButtonOpened {
+  composes: menuBurgerButton;
+  /* width: 50px; */
+  /* background: #333a; */
+  border-radius: 9999px;
+  border: 1px solid black;
+}
+
 #topLine,
 #bottomLine,
 #middleLine {

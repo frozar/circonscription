@@ -35,10 +35,13 @@ async function drawCirconscriptionArea(
           weight: 2,
           // TODO: add a slider to ajust opacity
           opacity: 0.75,
+          color: "white",
+          dashArray: "3",
+          fillOpacity: 0.7,
         },
         ...(resDepute
-          ? { color: legend[resDepute.parti_ratt_financier] }
-          : { color: "#FFFFFF" }),
+          ? { fillColor: legend[resDepute.parti_ratt_financier] }
+          : { fillColor: "#FFFFFF" }),
       };
     },
   });
