@@ -1,0 +1,9 @@
+.menuBurgerContainer {
+  z-index: 9999;
+  display: flex;
+  position: fixed;
+  top: 0;
+  background: #666;
+  height: 50px;
+  width: 50px;
+}

@@ -7,6 +7,7 @@ import { GeoJsonObject } from "geojson";
 // var leafletStream = require('leaflet-geojson-stream')
 import leafletStream from "leaflet-geojson-stream";
 import { StatusBar } from "./StatusBar";
+import { SideMenu } from "./SideMenu";
 
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 
@@ -156,6 +157,7 @@ async function initialiseMap() {
   const options: MapOptions = {
     center: latLng(-21.14695277642929, 55.53039550781251),
     zoom: 9,
+    zoomControl: false,
   };
 
   const mymap = map("map", options);
@@ -208,6 +210,7 @@ const App: Component = () => {
   return (
     <div>
       <div id="map" class={styles.map} />
+      <SideMenu />
       <StatusBar show={displaySpinningWheel} />
     </div>
   );
