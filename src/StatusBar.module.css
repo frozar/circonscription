@@ -1,0 +1,10 @@
+.statusBarContainer {
+  z-index: 9999;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: #fff6;
+  pointer-events: none;
+}

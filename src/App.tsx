@@ -1,4 +1,4 @@
-import { Show, onMount, type Component } from "solid-js";
+import { Show, createSignal, onMount, type Component } from "solid-js";
 
 import styles from "./App.module.css";
 import "leaflet/dist/leaflet.css";
@@ -6,6 +6,9 @@ import { map, latLng, tileLayer, MapOptions, geoJSON, Map } from "leaflet";
 import { GeoJsonObject } from "geojson";
 // var leafletStream = require('leaflet-geojson-stream')
 import leafletStream from "leaflet-geojson-stream";
+import { StatusBar } from "./StatusBar";
+
+const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 
 // TODO: display legend on map
 // TODO: add a handler on space stroke to recompute the legend colors
@@ -39,12 +42,14 @@ async function drawCirconscriptionArea(
     },
   });
 
+  setDisplaySpinningWheel(true);
   console.time("Execution Time");
   leafletStream
     .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer)
     .on("end", function () {
       // alert("all done!");
       console.timeEnd("Execution Time");
+      setDisplaySpinningWheel(false);
     });
 
   geoJsonLayer.addTo(mymap);
@@ -201,7 +206,12 @@ const App: Component = () => {
     window.mymap = mymap;
   });
 
-  return <div id="map" class={styles.map}></div>;
+  return (
+    <div>
+      <div id="map" class={styles.map} />
+      <StatusBar show={displaySpinningWheel} />
+    </div>
+  );
 };
 
 export default App;
