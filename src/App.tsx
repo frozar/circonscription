@@ -7,7 +7,7 @@ import { GeoJsonObject } from "geojson";
 // var leafletStream = require('leaflet-geojson-stream')
 import leafletStream from "leaflet-geojson-stream";
 import { StatusBar } from "./StatusBar";
-import { SideMenu } from "./SideMenu";
+import { SideMenu } from "./sideMenu/SideMenu";
 
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 
