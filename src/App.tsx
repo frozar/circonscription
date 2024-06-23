@@ -47,7 +47,6 @@ async function drawCirconscriptionArea(
   leafletStream
     .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer)
     .on("end", function () {
-      // alert("all done!");
       console.timeEnd("Execution Time");
       setDisplaySpinningWheel(false);
     });
