@@ -4,6 +4,8 @@ import styles from "./App.module.css";
 import "leaflet/dist/leaflet.css";
 import { map, latLng, tileLayer, MapOptions, geoJSON, Map } from "leaflet";
 import { GeoJsonObject } from "geojson";
+// var leafletStream = require('leaflet-geojson-stream')
+import leafletStream from "leaflet-geojson-stream";
 
 // TODO: display legend on map
 // TODO: add a handler on space stroke to recompute the legend colors
@@ -14,11 +16,12 @@ async function drawCirconscriptionArea(
   legend: LegendType,
   deputes: DeputesType
 ) {
-  const geoJson = await (
-    await fetch("/circonscriptions_legislatives_030522.json")
-  ).json();
+  // const geoJson = await (
+  //   await fetch("/circonscriptions_legislatives_030522.json")
+  // ).json();
 
-  const geoJsonLayer = geoJSON(geoJson.features as GeoJsonObject[], {
+  // const geoJsonLayer = geoJSON(geoJson.features as GeoJsonObject[], {
+  const geoJsonLayer = geoJSON([] as GeoJsonObject[], {
     // style: myStyle,
     style: function (feature) {
       const resDepute = findLayerDepute(feature.properties, deputes);
@@ -35,6 +38,14 @@ async function drawCirconscriptionArea(
       };
     },
   });
+
+  console.time("Execution Time");
+  leafletStream
+    .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer)
+    .on("end", function () {
+      // alert("all done!");
+      console.timeEnd("Execution Time");
+    });
 
   geoJsonLayer.addTo(mymap);
 
@@ -169,13 +180,13 @@ async function initialiseMap() {
   geoJsonLayer.bindPopup(function (layer) {
     const resDepute = findLayerDepute(layer.feature.properties, deputes);
 
+    // TODO: add link to depute website
     return (
       <div>
         <p>{layer.feature.properties.libelle}</p>
         <Show when={resDepute}>
           <p>{resDepute.nom}</p>
           <p>{resDepute.parti_ratt_financier}</p>
-          // TODO: add link to depute website
         </Show>
       </div>
     );
