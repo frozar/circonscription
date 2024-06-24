@@ -1,4 +1,11 @@
-import { Show, createSignal, onMount, type Component } from "solid-js";
+import {
+  Show,
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
+  type Component,
+} from "solid-js";
 
 import "leaflet/dist/leaflet.css";
 import {
@@ -12,7 +19,6 @@ import {
   TileLayer,
 } from "leaflet";
 import { GeoJsonObject, Geometry } from "geojson";
-// var leafletStream = require('leaflet-geojson-stream')
 import leafletStream from "leaflet-geojson-stream";
 import { StatusBar } from "./StatusBar";
 import { SideMenu } from "./sideMenu/SideMenu";
@@ -20,13 +26,53 @@ import { SideMenu } from "./sideMenu/SideMenu";
 import styles from "./App.module.css";
 import { DEFAULT_CIRCONSCRIPTION_OPACITY } from "./constant";
 
-const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
+type PartiRattFinancierType = string;
 
+type DeputeType = {
+  num_deptmt: string;
+  nom_circo: string;
+  num_circo: number;
+  mandat_debut: string;
+  mandat_fin: string;
+  groupe_sigle: string;
+  parti_ratt_financier: PartiRattFinancierType;
+  nom: string;
+  profession: string;
+};
+
+type LegendType = { [key: PartiRattFinancierType]: string };
+
+type LayerIdCircoType = string;
+
+type DeputesType = Array<{
+  depute: DeputeType;
+}>;
+
+const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
 const [geoJsonLayer, setGeoJsonLayer] = createSignal<GeoJSON<any, Geometry>>();
+const [legend, setLegend] = createSignal<LegendType>();
+const [deputes, setDeputes] = createSignal<DeputesType>();
+
+// Bind area color to new color when the legend update
+createEffect(() => {
+  // This line trigger the effect
+  legend();
+
+  if (!geoJsonLayer()) {
+    return;
+  }
+
+  geoJsonLayer()!.setStyle(function (feature) {
+    const resDepute = findLayerDepute(feature?.properties, deputes()!);
+
+    return resDepute
+      ? { fillColor: legend()![resDepute.parti_ratt_financier] }
+      : { fillColor: "#FFFFFF" };
+  });
+});
 
 // TODO: display legend on map
-// TODO: add a handler on space stroke to recompute the legend colors
 // TODO: use the localstorage to store the legend
 
 async function drawCirconscriptionArea(
@@ -66,25 +112,7 @@ async function drawCirconscriptionArea(
     });
 
   geoJsonLayer()?.addTo(mymap);
-
-  //  return [geoJsonLayer, setGeoJsonLayer];
 }
-
-type PartiRattFinancierType = string;
-
-type DeputeType = {
-  num_deptmt: string;
-  nom_circo: string;
-  num_circo: number;
-  mandat_debut: string;
-  mandat_fin: string;
-  groupe_sigle: string;
-  parti_ratt_financier: PartiRattFinancierType;
-  nom: string;
-  profession: string;
-};
-
-type LegendType = { [key: PartiRattFinancierType]: string };
 
 function generateRandomHexColor() {
   // Générer un nombre aléatoire entre 0 et 16777215 (0xFFFFFF en hexadécimal)
@@ -93,8 +121,6 @@ function generateRandomHexColor() {
   const hexColor = "#" + randomColor.toString(16).padStart(6, "0");
   return hexColor;
 }
-
-type LayerIdCircoType = string;
 
 const layerToDepute: { [key: LayerIdCircoType]: DeputeType } = {};
 
@@ -162,10 +188,6 @@ function computeLegend(
   return legend;
 }
 
-type DeputesType = Array<{
-  depute: DeputeType;
-}>;
-
 async function initialiseMap() {
   const options: MapOptions = {
     center: latLng(-21.14695277642929, 55.53039550781251),
@@ -193,8 +215,10 @@ async function initialiseMap() {
   const deputes = data.deputes.filter(
     (depItem) => depItem.depute.mandat_fin === "2024-06-09"
   );
+  setDeputes(deputes);
 
   const legend = computeLegend(deputes);
+  setLegend(legend);
 
   await drawCirconscriptionArea(mymap, legend, deputes);
   geoJsonLayer()?.bindPopup(function (layer) {
@@ -214,11 +238,36 @@ async function initialiseMap() {
   return mymap;
 }
 
+function keyStrokeHandler(event: KeyboardEvent) {
+  // console.log("keyStrokeHandler");
+  const code = event.code;
+  // console.log("code", code);
+  if (code === "Space") {
+    // console.log("code SPACE");
+    setLegend((currentLegend) => {
+      if (!currentLegend) {
+        return {};
+      }
+      const res: LegendType = {};
+      for (const parti of Object.keys(currentLegend)) {
+        res[parti] = generateRandomHexColor();
+      }
+      return res;
+    });
+  }
+}
+
 const App: Component = () => {
   onMount(async () => {
     const mymap = await initialiseMap();
 
     window.mymap = mymap;
+
+    document.addEventListener("keypress", keyStrokeHandler);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener("keypress", keyStrokeHandler);
   });
 
   return (
