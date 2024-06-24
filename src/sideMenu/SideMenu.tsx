@@ -1,8 +1,7 @@
-import { createSignal, onMount } from "solid-js";
-import noUiSlider, { API } from "nouislider";
+import { createSignal } from "solid-js";
 import { MenuBurger } from "./MenuBurger";
 import { GeoJSON, TileLayer } from "leaflet";
-import { GeoJsonObject, Geometry } from "geojson";
+import { Geometry } from "geojson";
 
 import "nouislider/dist/nouislider.css";
 import styles from "./SideMenu.module.css";
@@ -10,28 +9,7 @@ import {
   DEFAULT_BACKGROUND_OPACITY,
   DEFAULT_CIRCONSCRIPTION_OPACITY,
 } from "../constant";
-
-type SliderElement = HTMLElement & { noUiSlider: API };
-
-function instanciateSlider(htmlId: string, initialValue: number) {
-  const slider = document.getElementById(htmlId) as SliderElement | null;
-
-  if (!slider) {
-    console.error(`Cannot found element with id ${htmlId}`);
-    return;
-  }
-
-  noUiSlider.create(slider, {
-    start: [initialValue],
-    range: {
-      min: [0],
-      max: [1],
-    },
-    orientation: "horizontal",
-  });
-
-  return slider;
-}
+import { Slider } from "./Slider";
 
 export function SideMenu({
   backgroundLayer,
@@ -41,34 +19,6 @@ export function SideMenu({
   geoJsonLayer: GeoJSON<any, Geometry>;
 }) {
   const [sideMenuOpened, setSideMenuOpened] = createSignal(true);
-
-  onMount(() => {
-    const backgroundOpacitySliderId = "background-opacity-slider";
-    const backgroundOpacitySlider = instanciateSlider(
-      backgroundOpacitySliderId,
-      DEFAULT_BACKGROUND_OPACITY
-    );
-    backgroundOpacitySlider?.noUiSlider.on("update.one", function (values) {
-      const value = +values[0];
-      backgroundLayer.setOpacity(value);
-    });
-
-    const circonscriptionOpacitySliderId = "circonscription-opacity-slider";
-    const circonscriptionOpacitySlider = instanciateSlider(
-      circonscriptionOpacitySliderId,
-      DEFAULT_CIRCONSCRIPTION_OPACITY
-    );
-    circonscriptionOpacitySlider?.noUiSlider.on(
-      "update.one",
-      function (values) {
-        const value = +values[0];
-        geoJsonLayer.setStyle({
-          fillOpacity: value,
-        });
-        // backgroundLayer.setOpacity(value);
-      }
-    );
-  });
 
   return (
     <div class={styles.sideMenuRoot}>
@@ -89,21 +39,28 @@ export function SideMenu({
         <div class={styles.menuContentContainer}>
           <div class={styles.menuContentInner}>
             <div class={styles.menuControlContainer}>
-              <h3>Controles</h3>
+              <h3>Affichage</h3>
               <div class={styles.controlSlider}>
                 <p>Opacité fond de carte</p>
-                <div class={styles.sliderContainer}>
-                  <div id="background-opacity-slider" class={styles.slider} />
-                </div>
+                <Slider
+                  initialValue={DEFAULT_BACKGROUND_OPACITY}
+                  callback={(values) => {
+                    const value = +values[0];
+                    backgroundLayer.setOpacity(value);
+                  }}
+                />
               </div>
               <div class={styles.controlSlider}>
                 <p>Opacité circonscription</p>
-                <div class={styles.sliderContainer}>
-                  <div
-                    id="circonscription-opacity-slider"
-                    class={styles.slider}
-                  />
-                </div>
+                <Slider
+                  initialValue={DEFAULT_CIRCONSCRIPTION_OPACITY}
+                  callback={(values) => {
+                    const value = +values[0];
+                    geoJsonLayer.setStyle({
+                      fillOpacity: value,
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>
