@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 
 import "leaflet/dist/leaflet.css";
-import {
+import L, {
   map,
   latLng,
   tileLayer,
@@ -25,6 +25,7 @@ import { SideMenu } from "./sideMenu/SideMenu";
 
 import styles from "./App.module.css";
 import { DEFAULT_CIRCONSCRIPTION_OPACITY } from "./constant";
+import { updateLegend } from "./Legende";
 
 type PartiRattFinancierType = string;
 
@@ -40,7 +41,7 @@ type DeputeType = {
   profession: string;
 };
 
-type LegendType = { [key: PartiRattFinancierType]: string };
+export type LegendType = { [key: PartiRattFinancierType]: string };
 
 type LayerIdCircoType = string;
 
@@ -53,23 +54,28 @@ const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
 const [geoJsonLayer, setGeoJsonLayer] = createSignal<GeoJSON<any, Geometry>>();
 const [legend, setLegend] = createSignal<LegendType>();
 const [deputes, setDeputes] = createSignal<DeputesType>();
+const [mymap, setMymap] = createSignal<L.Map>();
 
 // Bind area color to new color when the legend update
+createEffect(() => {
+  if (legend() && mymap()) {
+    updateLegend(mymap()!, legend()!);
+  }
+});
+
 createEffect(() => {
   // This line trigger the effect
   legend();
 
-  if (!geoJsonLayer()) {
-    return;
+  if (geoJsonLayer()) {
+    geoJsonLayer()!.setStyle(function (feature) {
+      const resDepute = findLayerDepute(feature?.properties, deputes()!);
+
+      return resDepute
+        ? { fillColor: legend()![resDepute.parti_ratt_financier] }
+        : { fillColor: "#FFFFFF" };
+    });
   }
-
-  geoJsonLayer()!.setStyle(function (feature) {
-    const resDepute = findLayerDepute(feature?.properties, deputes()!);
-
-    return resDepute
-      ? { fillColor: legend()![resDepute.parti_ratt_financier] }
-      : { fillColor: "#FFFFFF" };
-  });
 });
 
 // TODO: display legend on map
@@ -103,11 +109,11 @@ async function drawCirconscriptionArea(
   );
 
   setDisplaySpinningWheel(true);
-  console.time("Execution Time");
+  console.time("Retrieve circonscription");
   leafletStream
     .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer())
     .on("end", function () {
-      console.timeEnd("Execution Time");
+      console.timeEnd("Retrieve circonscription");
       setDisplaySpinningWheel(false);
     });
 
@@ -183,7 +189,7 @@ function computeLegend(
     legend[partiPolitique] = color;
   }
 
-  console.log("legend", legend);
+  // console.log("legend", legend);
 
   return legend;
 }
@@ -197,6 +203,7 @@ async function initialiseMap() {
   };
 
   const mymap = map("map", options);
+  setMymap(mymap);
 
   setBackgroundLayer(
     tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -217,10 +224,10 @@ async function initialiseMap() {
   );
   setDeputes(deputes);
 
-  const legend = computeLegend(deputes);
-  setLegend(legend);
+  const legendWk = computeLegend(deputes);
+  setLegend(legendWk);
 
-  await drawCirconscriptionArea(mymap, legend, deputes);
+  await drawCirconscriptionArea(mymap, legendWk, deputes);
   geoJsonLayer()?.bindPopup(function (layer) {
     const resDepute = findLayerDepute(layer.feature.properties, deputes);
 
@@ -239,11 +246,8 @@ async function initialiseMap() {
 }
 
 function keyStrokeHandler(event: KeyboardEvent) {
-  // console.log("keyStrokeHandler");
   const code = event.code;
-  // console.log("code", code);
   if (code === "Space") {
-    // console.log("code SPACE");
     setLegend((currentLegend) => {
       if (!currentLegend) {
         return {};
