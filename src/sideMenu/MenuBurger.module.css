@@ -10,9 +10,9 @@
 .menuBurgerButtonOpened {
   composes: menuBurgerButton;
   /* width: 50px; */
-  /* background: #333a; */
+  background: black;
   border-radius: 9999px;
-  border: 1px solid black;
+  border: 2px solid white;
 }
 
 #topLine,

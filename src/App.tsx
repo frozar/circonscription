@@ -1,15 +1,29 @@
 import { Show, createSignal, onMount, type Component } from "solid-js";
 
-import styles from "./App.module.css";
 import "leaflet/dist/leaflet.css";
-import { map, latLng, tileLayer, MapOptions, geoJSON, Map } from "leaflet";
-import { GeoJsonObject } from "geojson";
+import {
+  map,
+  latLng,
+  tileLayer,
+  MapOptions,
+  geoJSON,
+  GeoJSON,
+  Map,
+  TileLayer,
+} from "leaflet";
+import { GeoJsonObject, Geometry } from "geojson";
 // var leafletStream = require('leaflet-geojson-stream')
 import leafletStream from "leaflet-geojson-stream";
 import { StatusBar } from "./StatusBar";
 import { SideMenu } from "./sideMenu/SideMenu";
 
+import styles from "./App.module.css";
+import { DEFAULT_CIRCONSCRIPTION_OPACITY } from "./constant";
+
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
+
+const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
+const [geoJsonLayer, setGeoJsonLayer] = createSignal<GeoJSON<any, Geometry>>();
 
 // TODO: display legend on map
 // TODO: add a handler on space stroke to recompute the legend colors
@@ -20,44 +34,40 @@ async function drawCirconscriptionArea(
   legend: LegendType,
   deputes: DeputesType
 ) {
-  // const geoJson = await (
-  //   await fetch("/circonscriptions_legislatives_030522.json")
-  // ).json();
+  setGeoJsonLayer(
+    geoJSON([] as GeoJsonObject[], {
+      style: function (feature) {
+        const resDepute = findLayerDepute(feature?.properties, deputes);
 
-  // const geoJsonLayer = geoJSON(geoJson.features as GeoJsonObject[], {
-  const geoJsonLayer = geoJSON([] as GeoJsonObject[], {
-    // style: myStyle,
-    style: function (feature) {
-      const resDepute = findLayerDepute(feature.properties, deputes);
-
-      return {
-        ...{
-          weight: 2,
-          // TODO: add a slider to ajust opacity
-          opacity: 0.75,
-          color: "white",
-          dashArray: "3",
-          fillOpacity: 0.7,
-        },
-        ...(resDepute
-          ? { fillColor: legend[resDepute.parti_ratt_financier] }
-          : { fillColor: "#FFFFFF" }),
-      };
-    },
-  });
+        return {
+          ...{
+            weight: 2,
+            // TODO: add a slider to ajust opacity
+            opacity: 0.75,
+            color: "white",
+            dashArray: "10",
+            fillOpacity: DEFAULT_CIRCONSCRIPTION_OPACITY,
+          },
+          ...(resDepute
+            ? { fillColor: legend[resDepute.parti_ratt_financier] }
+            : { fillColor: "#FFFFFF" }),
+        };
+      },
+    })
+  );
 
   setDisplaySpinningWheel(true);
   console.time("Execution Time");
   leafletStream
-    .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer)
+    .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer())
     .on("end", function () {
       console.timeEnd("Execution Time");
       setDisplaySpinningWheel(false);
     });
 
-  geoJsonLayer.addTo(mymap);
+  geoJsonLayer()?.addTo(mymap);
 
-  return geoJsonLayer;
+  //  return [geoJsonLayer, setGeoJsonLayer];
 }
 
 type PartiRattFinancierType = string;
@@ -161,16 +171,17 @@ async function initialiseMap() {
     center: latLng(-21.14695277642929, 55.53039550781251),
     zoom: 9,
     zoomControl: false,
+    wheelPxPerZoomLevel: 600,
   };
 
   const mymap = map("map", options);
 
-  tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution:
-      "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-    // TODO: add a slider to ajust opacity
-    // opacity: 0.75,
-  }).addTo(mymap);
+  setBackgroundLayer(
+    tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+    }).addTo(mymap)
+  );
 
   const data = (await (
     await fetch("/nosdeputes.fr_deputes_2024-06-22.json")
@@ -185,8 +196,8 @@ async function initialiseMap() {
 
   const legend = computeLegend(deputes);
 
-  const geoJsonLayer = await drawCirconscriptionArea(mymap, legend, deputes);
-  geoJsonLayer.bindPopup(function (layer) {
+  await drawCirconscriptionArea(mymap, legend, deputes);
+  geoJsonLayer()?.bindPopup(function (layer) {
     const resDepute = findLayerDepute(layer.feature.properties, deputes);
 
     // TODO: add link to depute website
@@ -213,7 +224,12 @@ const App: Component = () => {
   return (
     <div>
       <div id="map" class={styles.map} />
-      <SideMenu />
+      <Show when={backgroundLayer() && geoJsonLayer()}>
+        <SideMenu
+          backgroundLayer={backgroundLayer()!}
+          geoJsonLayer={geoJsonLayer()!}
+        />
+      </Show>
       <StatusBar show={displaySpinningWheel} />
     </div>
   );

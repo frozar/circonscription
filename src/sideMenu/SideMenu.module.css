@@ -6,7 +6,7 @@
   background: #fff0;
 }
 
-.sideMenuContent {
+.sideMenu {
   composes: sideMenuBackground;
   height: 100vh;
   width: 0px;
@@ -15,15 +15,13 @@
   transition: width 0.2s;
 }
 
-.sideMenuContentOpened {
-  composes: sideMenuContent;
+.sideMenuOpened {
+  composes: sideMenu;
   width: 300px;
-  /* background: #aaa; */
 }
 
 .menuBurgerContainer {
   composes: sideMenuBackground;
-  /* display: block; */
   z-index: 9999;
   position: absolute;
   top: 0;
@@ -37,15 +35,38 @@
 
 .menuBurgerContainerOpened {
   composes: menuBurgerContainer;
+  top: 10px;
   right: 0;
   width: 100%;
   background: #fff0;
 }
 
-.menuControlContainer {
+.menuContentContainer {
+  /* border: solid 1px red; */
   overflow: hidden;
 }
 
-.menuControlInner {
+.menuContentInner {
+  /* border: solid 1px green; */
   margin-top: calc(var(--menu-burger-height) + 20px);
+  padding: 20px 25px;
+}
+
+.menuControlContainer {
+  padding: 20px;
+  background: #fffb;
+  border-radius: 8px;
+  box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+}
+
+.controlSlider {
+  margin-top: 15px;
+}
+
+.sliderContainer {
+  margin-top: 10px;
+}
+
+.slider {
+  margin: 0px 17px;
 }
