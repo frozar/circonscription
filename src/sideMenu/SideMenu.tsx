@@ -42,25 +42,29 @@ export function SideMenu({
               <h3>Affichage</h3>
               <div class={styles.controlSlider}>
                 <p>Opacité fond de carte</p>
-                <Slider
-                  initialValue={DEFAULT_BACKGROUND_OPACITY}
-                  callback={(values) => {
-                    const value = +values[0];
-                    backgroundLayer.setOpacity(value);
-                  }}
-                />
+                <div class={styles.sliderContainer}>
+                  <Slider
+                    initialValue={DEFAULT_BACKGROUND_OPACITY}
+                    callback={(values) => {
+                      const value = +values[0];
+                      backgroundLayer.setOpacity(value);
+                    }}
+                  />
+                </div>
               </div>
               <div class={styles.controlSlider}>
                 <p>Opacité circonscription</p>
-                <Slider
-                  initialValue={DEFAULT_CIRCONSCRIPTION_OPACITY}
-                  callback={(values) => {
-                    const value = +values[0];
-                    geoJsonLayer.setStyle({
-                      fillOpacity: value,
-                    });
-                  }}
-                />
+                <div class={styles.sliderContainer}>
+                  <Slider
+                    initialValue={DEFAULT_CIRCONSCRIPTION_OPACITY}
+                    callback={(values) => {
+                      const value = +values[0];
+                      geoJsonLayer.setStyle({
+                        fillOpacity: value,
+                      });
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>

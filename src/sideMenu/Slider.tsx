@@ -42,9 +42,5 @@ export function Slider({
     ref.noUiSlider?.on("update.one", callback);
   });
 
-  return (
-    <div class={styles.sliderContainer}>
-      <div ref={ref} class={styles.slider} />
-    </div>
-  );
+  return <div ref={ref} class={styles.slider} />;
 }
