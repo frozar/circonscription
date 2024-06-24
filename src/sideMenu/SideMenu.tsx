@@ -2,14 +2,9 @@ import { createSignal } from "solid-js";
 import { MenuBurger } from "./MenuBurger";
 import { GeoJSON, TileLayer } from "leaflet";
 import { Geometry } from "geojson";
+import { AffichageSettings } from "./AffichageSettings";
 
-import "nouislider/dist/nouislider.css";
 import styles from "./SideMenu.module.css";
-import {
-  DEFAULT_BACKGROUND_OPACITY,
-  DEFAULT_CIRCONSCRIPTION_OPACITY,
-} from "../constant";
-import { Slider } from "./Slider";
 
 export function SideMenu({
   backgroundLayer,
@@ -39,33 +34,10 @@ export function SideMenu({
         <div class={styles.menuContentContainer}>
           <div class={styles.menuContentInner}>
             <div class={styles.menuControlContainer}>
-              <h3>Affichage</h3>
-              <div class={styles.controlSlider}>
-                <p>Opacité fond de carte</p>
-                <div class={styles.sliderContainer}>
-                  <Slider
-                    initialValue={DEFAULT_BACKGROUND_OPACITY}
-                    callback={(values) => {
-                      const value = +values[0];
-                      backgroundLayer.setOpacity(value);
-                    }}
-                  />
-                </div>
-              </div>
-              <div class={styles.controlSlider}>
-                <p>Opacité circonscription</p>
-                <div class={styles.sliderContainer}>
-                  <Slider
-                    initialValue={DEFAULT_CIRCONSCRIPTION_OPACITY}
-                    callback={(values) => {
-                      const value = +values[0];
-                      geoJsonLayer.setStyle({
-                        fillOpacity: value,
-                      });
-                    }}
-                  />
-                </div>
-              </div>
+              <AffichageSettings
+                backgroundLayer={backgroundLayer}
+                geoJsonLayer={geoJsonLayer}
+              />
             </div>
           </div>
         </div>
