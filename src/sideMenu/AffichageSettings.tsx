@@ -7,6 +7,7 @@ import {
   DEFAULT_CIRCONSCRIPTION_OPACITY,
 } from "../constant";
 import { Slider } from "./Slider";
+import { setLegendDisplayed } from "../App";
 
 export function AffichageSettings({
   backgroundLayer,
@@ -43,6 +44,15 @@ export function AffichageSettings({
             }}
           />
         </div>
+      </div>
+      <div class={styles.controlSlider}>
+        <input
+          type="checkbox"
+          onChange={(event) => {
+            setLegendDisplayed(event.target.checked);
+          }}
+        />
+        <span class={styles.legendLabel}>Affiché la légende</span>
       </div>
     </>
   );

@@ -39,10 +39,15 @@ function addLegend(mymap: L.Map, legend: LegendType) {
   legendDisplay.addTo(mymap);
 }
 
-export function updateLegend(mymap: L.Map, legend: LegendType) {
+export function removeLegend() {
   // console.log("legendDisplay", legendDisplay);
   if (legendDisplay) {
     legendDisplay.remove();
   }
+}
+
+export function updateLegend(mymap: L.Map, legend: LegendType) {
+  // console.log("legendDisplay", legendDisplay);
+  removeLegend();
   addLegend(mymap, legend);
 }

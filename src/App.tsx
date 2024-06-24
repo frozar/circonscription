@@ -25,7 +25,7 @@ import { SideMenu } from "./sideMenu/SideMenu";
 
 import styles from "./App.module.css";
 import { DEFAULT_CIRCONSCRIPTION_OPACITY } from "./constant";
-import { updateLegend } from "./Legende";
+import { removeLegend, updateLegend } from "./Legende";
 
 type PartiRattFinancierType = string;
 
@@ -55,10 +55,14 @@ const [geoJsonLayer, setGeoJsonLayer] = createSignal<GeoJSON<any, Geometry>>();
 const [legend, setLegend] = createSignal<LegendType>();
 const [deputes, setDeputes] = createSignal<DeputesType>();
 const [mymap, setMymap] = createSignal<L.Map>();
+export const [legendDisplayed, setLegendDisplayed] = createSignal(false);
 
 // Bind area color to new color when the legend update
 createEffect(() => {
-  if (legend() && mymap()) {
+  // console.log("legendDisplayed()", legendDisplayed());
+  if (!legendDisplayed()) {
+    removeLegend();
+  } else if (legendDisplayed() && legend() && mymap()) {
     updateLegend(mymap()!, legend()!);
   }
 });
@@ -78,7 +82,6 @@ createEffect(() => {
   }
 });
 
-// TODO: display legend on map
 // TODO: use the localstorage to store the legend
 
 async function drawCirconscriptionArea(
@@ -94,7 +97,6 @@ async function drawCirconscriptionArea(
         return {
           ...{
             weight: 2,
-            // TODO: add a slider to ajust opacity
             opacity: 0.75,
             color: "white",
             dashArray: "10",
