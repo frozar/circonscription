@@ -7,6 +7,7 @@ export function StatusBar({ show }: { show: Accessor<boolean> }) {
     <Show when={show()}>
       <div class={styles.statusBarContainer}>
         <SpinningWheel />
+        <div>Chargement des circonscriptions</div>
       </div>
     </Show>
   );
