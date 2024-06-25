@@ -61,7 +61,7 @@ export function AffichageSettings({
           type="checkbox"
           checked={legendDisplayed()}
         />
-        <span class={styles.legendLabel}>Affiché la légende</span>
+        <span class={styles.legendLabel}>Afficher la légende</span>
       </div>
     </div>
   );

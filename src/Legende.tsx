@@ -8,19 +8,28 @@ function legendHtml(legend: LegendType) {
   return (
     <div class={styles.legend}>
       <h4 class={styles.legendTitle}>Légende</h4>
-      <For each={Object.entries(legend)}>
-        {([parti, color]) => {
-          // console.log("parti", parti);
-          // console.log("color", color);
-          return (
-            <>
-              <i class={styles.legendSquare} style={`background: ${color}`}></i>
-              <span class={styles.legendLabel}>{parti}</span>
-              <br />
-            </>
-          );
-        }}
-      </For>
+      <div class={styles.legendItems}>
+        <For each={Object.entries(legend)}>
+          {([parti, color]) => {
+            // console.log("parti", parti);
+            // console.log("color", color);
+            return (
+              <div class={styles.legendItem}>
+                <div>
+                  <i
+                    class={styles.legendSquare}
+                    style={`background: ${color}`}
+                  ></i>
+                </div>
+                <div>
+                  <span class={styles.legendLabel}>{parti}</span>
+                  {/* <br /> */}
+                </div>
+              </div>
+            );
+          }}
+        </For>
+      </div>
     </div>
   ) as HTMLElement;
 }

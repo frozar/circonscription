@@ -24,7 +24,10 @@ import { StatusBar } from "./StatusBar";
 import { SideMenu } from "./sideMenu/SideMenu";
 
 import styles from "./App.module.css";
-import { DEFAULT_CIRCONSCRIPTION_OPACITY } from "./constant";
+import {
+  DEFAULT_CIRCONSCRIPTION_OPACITY,
+  NB_CIRCONSCRIPTION,
+} from "./constant";
 import { removeLegend, updateLegend } from "./Legende";
 
 type PartiRattFinancierType = string;
@@ -57,6 +60,8 @@ const [deputes, setDeputes] = createSignal<DeputesType>();
 const [mymap, setMymap] = createSignal<L.Map>();
 export const [legendDisplayed, setLegendDisplayed] = createSignal(false);
 
+const [nbCirconscriptionLoaded, setNbCirconscriptionLoaded] = createSignal(0);
+
 // Bind area color to new color when the legend update
 createEffect(() => {
   if (!legendDisplayed()) {
@@ -83,7 +88,7 @@ createEffect(() => {
 
 // TODO: use the localstorage to store the legend
 
-async function drawCirconscriptionArea(
+function drawCirconscriptionArea(
   mymap: Map,
   legend: LegendType,
   deputes: DeputesType
@@ -113,6 +118,11 @@ async function drawCirconscriptionArea(
   console.time("Retrieve circonscription");
   leafletStream
     .ajax("/circonscriptions_legislatives_030522.json", geoJsonLayer())
+    .on("data", function () {
+      setNbCirconscriptionLoaded(
+        (currentCirconscriptionLoaded) => currentCirconscriptionLoaded + 1
+      );
+    })
     .on("end", function () {
       console.timeEnd("Retrieve circonscription");
       setDisplaySpinningWheel(false);
@@ -228,7 +238,7 @@ async function initialiseMap() {
   const legendWk = computeLegend(deputes);
   setLegend(legendWk);
 
-  await drawCirconscriptionArea(mymap, legendWk, deputes);
+  drawCirconscriptionArea(mymap, legendWk, deputes);
   geoJsonLayer()?.bindPopup(function (layer) {
     const resDepute = findLayerDepute(layer.feature.properties, deputes);
 
@@ -284,7 +294,10 @@ const App: Component = () => {
           geoJsonLayer={geoJsonLayer()!}
         />
       </Show>
-      <StatusBar show={displaySpinningWheel} />
+      <StatusBar
+        show={displaySpinningWheel}
+        message={`${nbCirconscriptionLoaded()}/${NB_CIRCONSCRIPTION} circonscription`}
+      />
     </div>
   );
 };
