@@ -7,7 +7,8 @@ import {
   DEFAULT_CIRCONSCRIPTION_OPACITY,
 } from "../constant";
 import { Slider } from "./Slider";
-import { setLegendDisplayed } from "../App";
+import { legendDisplayed, setLegendDisplayed } from "../App";
+import { createSignal } from "solid-js";
 
 export function AffichageSettings({
   backgroundLayer,
@@ -16,8 +17,10 @@ export function AffichageSettings({
   backgroundLayer: TileLayer;
   geoJsonLayer: GeoJSON<any, Geometry>;
 }) {
+  // const [display] = createSignal(false)
+
   return (
-    <>
+    <div class={styles.controlRoot}>
       <h3>Affichage</h3>
       <div class={styles.controlSlider}>
         <p>Opacité fond de carte</p>
@@ -45,15 +48,21 @@ export function AffichageSettings({
           />
         </div>
       </div>
-      <div class={styles.controlSlider}>
+      <div
+        class={styles.controlCheckbox}
+        onClick={() => {
+          setLegendDisplayed((displayed) => {
+            return !displayed;
+          });
+        }}
+      >
         <input
+          class={styles.legendCheckbox}
           type="checkbox"
-          onChange={(event) => {
-            setLegendDisplayed(event.target.checked);
-          }}
+          checked={legendDisplayed()}
         />
         <span class={styles.legendLabel}>Affiché la légende</span>
       </div>
-    </>
+    </div>
   );
 }

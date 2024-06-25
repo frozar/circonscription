@@ -59,7 +59,6 @@ export const [legendDisplayed, setLegendDisplayed] = createSignal(false);
 
 // Bind area color to new color when the legend update
 createEffect(() => {
-  // console.log("legendDisplayed()", legendDisplayed());
   if (!legendDisplayed()) {
     removeLegend();
   } else if (legendDisplayed() && legend() && mymap()) {

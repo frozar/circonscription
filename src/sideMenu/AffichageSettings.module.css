@@ -1,11 +1,25 @@
+.controlRoot {
+  --control-margin-top: 15px;
+}
+
 .controlSlider {
-  margin-top: 15px;
+  margin-top: var(--control-margin-top);
 }
 
 .sliderContainer {
   margin-top: 10px;
 }
 
+.controlCheckbox {
+  margin-top: var(--control-margin-top);
+  cursor: pointer;
+}
+
+.legendCheckbox {
+  cursor: inherit;
+}
+
 .legendLabel {
   margin-left: 5px;
+  user-select: none;
 }

@@ -1,5 +1,6 @@
 .sideMenuRoot {
   --menu-burger-height: 50px;
+  pointer-events: none;
 }
 
 .sideMenuBackground {
@@ -31,6 +32,7 @@
   display: flex;
   justify-content: flex-end;
   transition: all 0.2s;
+  pointer-events: all;
 }
 
 .menuBurgerContainerOpened {
@@ -42,13 +44,12 @@
 }
 
 .menuContentContainer {
-  /* border: solid 1px red; */
   overflow: hidden;
 }
 
 .menuContentInner {
-  /* border: solid 1px green; */
   margin-top: calc(var(--menu-burger-height) + 20px);
+  margin-bottom: 20px;
   padding: 20px 25px;
 }
 
@@ -57,4 +58,5 @@
   background: #fffb;
   border-radius: 8px;
   box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+  pointer-events: all;
 }
