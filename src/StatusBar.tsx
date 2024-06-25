@@ -7,13 +7,13 @@ export function StatusBar({
   message,
 }: {
   show: Accessor<boolean>;
-  message: string;
+  message: Accessor<string>;
 }) {
   return (
     <Show when={show()}>
       <div class={styles.statusBarContainer}>
         <SpinningWheel />
-        <div>{message}</div>
+        <div>{message()}</div>
       </div>
     </Show>
   );
