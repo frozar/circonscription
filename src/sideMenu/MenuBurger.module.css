@@ -1,5 +1,7 @@
+@import "./SideMenuRoot.css";
+
 .menuBurgerButton {
-  width: 50px;
+  width: var(--menu-burger-size);
   /* background: #666;
   border-radius: 9999px;
   border: 1px solid black; */
