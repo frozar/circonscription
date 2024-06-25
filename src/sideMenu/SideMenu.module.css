@@ -48,7 +48,7 @@
 }
 
 .menuContentInner {
-  margin-top: calc(var(--menu-burger-height) + 20px);
+  margin-top: var(--menu-burger-height);
   margin-bottom: 20px;
   padding: 20px 25px;
 }

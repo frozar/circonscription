@@ -56,24 +56,108 @@ const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
 const [geoJsonLayer, setGeoJsonLayer] = createSignal<GeoJSON<any, Geometry>>();
 const [legend, setLegend] = createSignal<LegendType>();
+const [legendEffective, setLegendEffective] = createSignal<LegendType>();
 const [deputes, setDeputes] = createSignal<DeputesType>();
 const [mymap, setMymap] = createSignal<L.Map>();
 export const [legendDisplayed, setLegendDisplayed] = createSignal(false);
 
 const [nbCirconscriptionLoaded, setNbCirconscriptionLoaded] = createSignal(0);
+const [circonscriptionLoadFinished, setCirconscriptionLoadFinished] =
+  createSignal(false);
+
+// const legendEffective = () => {
+//   console.log("geoJsonLayer()", geoJsonLayer());
+//   const resFilteredLegend: LegendType = {};
+//   if (geoJsonLayer() && legend()) {
+//     const mapBounds = mymap()!.getBounds();
+//     for (const layer of geoJsonLayer()!.getLayers()) {
+//       if (
+//         mapBounds.contains(layer.getBounds()) ||
+//         mapBounds.intersects(layer.getBounds())
+//       ) {
+//         console.log("layer", layer);
+//         console.log("layer.getBounds()", layer.getBounds());
+//         console.log("mapBounds", mapBounds);
+//         console.log(
+//           "mapBounds.contains",
+//           mapBounds.contains(layer.getBounds())
+//         );
+//         console.log(
+//           "mapBounds.intersects",
+//           mapBounds.intersects(layer.getBounds())
+//         );
+
+//         const resDepute = findLayerDepute(layer.feature.properties, deputes);
+
+//         if (resDepute) {
+//           resFilteredLegend[resDepute.parti_ratt_financier] =
+//             legend()![resDepute.parti_ratt_financier];
+//         }
+//       }
+//     }
+//   }
+
+//   return resFilteredLegend;
+// };
+
+function filterLegend() {
+  // console.log("geoJsonLayer()", geoJsonLayer());
+  const resFilteredLegend: LegendType = {};
+  if (geoJsonLayer() && legend()) {
+    const mapBounds = mymap()!.getBounds();
+    for (const layer of geoJsonLayer()!.getLayers()) {
+      if (
+        mapBounds.contains(layer.getBounds()) ||
+        mapBounds.intersects(layer.getBounds())
+      ) {
+        // console.log("layer", layer);
+        // console.log("layer.getBounds()", layer.getBounds());
+        // console.log("mapBounds", mapBounds);
+        // console.log(
+        //   "mapBounds.contains",
+        //   mapBounds.contains(layer.getBounds())
+        // );
+        // console.log(
+        //   "mapBounds.intersects",
+        //   mapBounds.intersects(layer.getBounds())
+        // );
+
+        const resDepute = findLayerDepute(layer.feature.properties, deputes);
+
+        if (resDepute) {
+          resFilteredLegend[resDepute.parti_ratt_financier] =
+            legend()![resDepute.parti_ratt_financier];
+        }
+      }
+    }
+  }
+
+  return resFilteredLegend;
+}
+
+// Setup legend filtered when circonscription are loaded
+createEffect(() => {
+  if (circonscriptionLoadFinished()) {
+    setLegendEffective(filterLegend());
+  }
+});
+
+// const [legendEffective, setLegendEffective] = createSignal(filterLegend());
+
+// console.log("legendEffective", legendEffective());
 
 // Bind area color to new color when the legend update
 createEffect(() => {
   if (!legendDisplayed()) {
     removeLegend();
-  } else if (legendDisplayed() && legend() && mymap()) {
-    updateLegend(mymap()!, legend()!);
+  } else if (legendDisplayed() && legendEffective() && mymap()) {
+    updateLegend(mymap()!, legendEffective()!);
   }
 });
 
 createEffect(() => {
   // This line trigger the effect
-  legend();
+  legendEffective();
 
   if (geoJsonLayer()) {
     geoJsonLayer()!.setStyle(function (feature) {
@@ -85,8 +169,6 @@ createEffect(() => {
     });
   }
 });
-
-// TODO: use the localstorage to store the legend
 
 function drawCirconscriptionArea(
   mymap: Map,
@@ -126,7 +208,10 @@ function drawCirconscriptionArea(
     .on("end", function () {
       console.timeEnd("Retrieve circonscription");
       setDisplaySpinningWheel(false);
+      setCirconscriptionLoadFinished(true);
     });
+
+  // console.log("geoJsonLayer()", geoJsonLayer());
 
   geoJsonLayer()?.addTo(mymap);
 }
@@ -238,7 +323,13 @@ async function initialiseMap() {
   const legendWk = computeLegend(deputes);
   setLegend(legendWk);
 
+  // Draw circonscription area
   drawCirconscriptionArea(mymap, legendWk, deputes);
+
+  // // Setup legend filtered
+  // setLegendEffective(filterLegend());
+
+  // Setup popup
   geoJsonLayer()?.bindPopup(function (layer) {
     const resDepute = findLayerDepute(layer.feature.properties, deputes);
 
@@ -253,6 +344,17 @@ async function initialiseMap() {
       </div>
     );
   });
+
+  mymap.on("zoomend", () => {
+    setLegendEffective(filterLegend());
+    // console.log("ZoomEnd");
+  });
+
+  mymap.on("moveend", () => {
+    setLegendEffective(filterLegend());
+    // console.log("MoveEnd");
+  });
+
   return mymap;
 }
 
@@ -272,6 +374,32 @@ function keyStrokeHandler(event: KeyboardEvent) {
   }
 }
 
+// function updateCroppedLegend() {
+//   console.log("geoJsonLayer()", geoJsonLayer());
+//   // console.log("geoJsonLayer()?.getLayers()", geoJsonLayer()?.getLayers());
+//   if (geoJsonLayer()) {
+//     const mapBounds = mymap()!.getBounds();
+//     for (const layer of geoJsonLayer()!.getLayers()) {
+//       if (
+//         mapBounds.contains(layer.getBounds()) ||
+//         mapBounds.intersects(layer.getBounds())
+//       ) {
+//         console.log("layer", layer);
+//         console.log("layer.getBounds()", layer.getBounds());
+//         console.log("mapBounds", mapBounds);
+//         console.log(
+//           "mapBounds.contains",
+//           mapBounds.contains(layer.getBounds())
+//         );
+//         console.log(
+//           "mapBounds.intersects",
+//           mapBounds.intersects(layer.getBounds())
+//         );
+//       }
+//     }
+//   }
+// }
+
 const App: Component = () => {
   onMount(async () => {
     const mymap = await initialiseMap();
@@ -280,6 +408,12 @@ const App: Component = () => {
 
     document.addEventListener("keypress", keyStrokeHandler);
   });
+
+  // createEffect(() => {
+  //   if (circonscriptionLoadFinished()) {
+  //     updateCroppedLegend();
+  //   }
+  // });
 
   onCleanup(() => {
     document.removeEventListener("keypress", keyStrokeHandler);
