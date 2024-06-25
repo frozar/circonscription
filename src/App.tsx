@@ -285,6 +285,13 @@ const App: Component = () => {
     document.removeEventListener("keypress", keyStrokeHandler);
   });
 
+  const statusBarMessage = () =>
+    `${nbCirconscriptionLoaded()}/${NB_CIRCONSCRIPTION} circonscription`;
+
+  createEffect(() => {
+    console.log("statusBarMessage", statusBarMessage());
+  });
+
   return (
     <div>
       <div id="map" class={styles.map} />
@@ -294,10 +301,7 @@ const App: Component = () => {
           geoJsonLayer={geoJsonLayer()!}
         />
       </Show>
-      <StatusBar
-        show={displaySpinningWheel}
-        message={`${nbCirconscriptionLoaded()}/${NB_CIRCONSCRIPTION} circonscription`}
-      />
+      <StatusBar show={displaySpinningWheel} message={statusBarMessage()} />
     </div>
   );
 };
