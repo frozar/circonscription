@@ -28,147 +28,26 @@ import {
   DEFAULT_CIRCONSCRIPTION_OPACITY,
   NB_CIRCONSCRIPTION,
 } from "./constant";
-import { Legend } from "./Legende";
-
-type PartiRattFinancierType = string;
-
-type DeputeType = {
-  num_deptmt: string;
-  nom_circo: string;
-  num_circo: number;
-  mandat_debut: string;
-  mandat_fin: string;
-  groupe_sigle: string;
-  parti_ratt_financier: PartiRattFinancierType;
-  nom: string;
-  profession: string;
-};
-
-export type LegendType = { [key: PartiRattFinancierType]: string };
-
-type LayerIdCircoType = string;
-
-type DeputesType = Array<{
-  depute: DeputeType;
-}>;
+import {
+  Legend,
+  filterLegend,
+  setCirconscriptionLoadFinished,
+  setLegend,
+  setLegendEffective,
+} from "./Legende";
+import { DeputeType, DeputesType, LegendType } from "./type";
+import { findLayerDepute } from "./utils";
 
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
-const [geoJsonLayer, setGeoJsonLayer] = createSignal<GeoJSON<any, Geometry>>();
-const [legend, setLegend] = createSignal<LegendType>();
-const [legendEffective, setLegendEffective] = createSignal<LegendType>();
-const [deputes, setDeputes] = createSignal<DeputesType>();
-const [mymap, setMymap] = createSignal<L.Map>();
+export const [geoJsonLayer, setGeoJsonLayer] =
+  createSignal<GeoJSON<any, Geometry>>();
+
+export const [deputes, setDeputes] = createSignal<DeputesType>();
+export const [mymap, setMymap] = createSignal<L.Map>();
 export const [displayLegend, setDisplayLegend] = createSignal(false);
 
 const [nbCirconscriptionLoaded, setNbCirconscriptionLoaded] = createSignal(0);
-const [circonscriptionLoadFinished, setCirconscriptionLoadFinished] =
-  createSignal(false);
-
-// const legendEffective = () => {
-//   console.log("geoJsonLayer()", geoJsonLayer());
-//   const resFilteredLegend: LegendType = {};
-//   if (geoJsonLayer() && legend()) {
-//     const mapBounds = mymap()!.getBounds();
-//     for (const layer of geoJsonLayer()!.getLayers()) {
-//       if (
-//         mapBounds.contains(layer.getBounds()) ||
-//         mapBounds.intersects(layer.getBounds())
-//       ) {
-//         console.log("layer", layer);
-//         console.log("layer.getBounds()", layer.getBounds());
-//         console.log("mapBounds", mapBounds);
-//         console.log(
-//           "mapBounds.contains",
-//           mapBounds.contains(layer.getBounds())
-//         );
-//         console.log(
-//           "mapBounds.intersects",
-//           mapBounds.intersects(layer.getBounds())
-//         );
-
-//         const resDepute = findLayerDepute(layer.feature.properties, deputes);
-
-//         if (resDepute) {
-//           resFilteredLegend[resDepute.parti_ratt_financier] =
-//             legend()![resDepute.parti_ratt_financier];
-//         }
-//       }
-//     }
-//   }
-
-//   return resFilteredLegend;
-// };
-
-function filterLegend() {
-  // console.log("geoJsonLayer()", geoJsonLayer());
-  const resFilteredLegend: LegendType = {};
-  if (geoJsonLayer() && legend()) {
-    const mapBounds = mymap()!.getBounds();
-    for (const layer of geoJsonLayer()!.getLayers()) {
-      if (
-        mapBounds.contains(layer.getBounds()) ||
-        mapBounds.intersects(layer.getBounds())
-      ) {
-        // console.log("layer", layer);
-        // console.log("layer.getBounds()", layer.getBounds());
-        // console.log("mapBounds", mapBounds);
-        // console.log(
-        //   "mapBounds.contains",
-        //   mapBounds.contains(layer.getBounds())
-        // );
-        // console.log(
-        //   "mapBounds.intersects",
-        //   mapBounds.intersects(layer.getBounds())
-        // );
-
-        const resDepute = findLayerDepute(layer.feature.properties, deputes);
-
-        if (resDepute) {
-          resFilteredLegend[resDepute.parti_ratt_financier] =
-            legend()![resDepute.parti_ratt_financier];
-        }
-      }
-    }
-  }
-
-  return resFilteredLegend;
-}
-
-// Setup legend filtered when circonscription are loaded
-createEffect(() => {
-  if (circonscriptionLoadFinished()) {
-    setLegendEffective(filterLegend());
-  }
-});
-
-// const [legendEffective, setLegendEffective] = createSignal(filterLegend());
-
-// console.log("legendEffective", legendEffective());
-
-// // Bind area color to new color when the legend update
-// createEffect(() => {
-//   if (!displayLegend()) {
-//     removeLegend();
-//   } else if (displayLegend() && legendEffective() && mymap()) {
-//     updateLegend(mymap()!, legendEffective()!);
-//   }
-// });
-
-createEffect(() => {
-  // This line trigger the effect
-  legendEffective();
-
-  if (geoJsonLayer()) {
-    geoJsonLayer()!.setStyle(function (feature) {
-      const resDepute = findLayerDepute(feature?.properties, deputes()!);
-
-      return resDepute
-        ? { fillColor: legend()![resDepute.parti_ratt_financier] }
-        : { fillColor: "#FFFFFF" };
-    });
-  }
-});
 
 function drawCirconscriptionArea(
   mymap: Map,
@@ -222,39 +101,6 @@ function generateRandomHexColor() {
   // Convertir le nombre en chaîne hexadécimale et s'assurer qu'il y a toujours 6 caractères en ajoutant des zéros au besoin
   const hexColor = "#" + randomColor.toString(16).padStart(6, "0");
   return hexColor;
-}
-
-const layerToDepute: { [key: LayerIdCircoType]: DeputeType } = {};
-
-function findLayerDepute(
-  featureProperties: { id_circo: string; dep: string },
-  deputes: DeputesType
-) {
-  const { id_circo: layerIdCirco, dep: layerNumDep } = featureProperties;
-
-  const layerNumCirco = +layerIdCirco.replace(layerNumDep, "");
-
-  const candidateDepute = layerToDepute[layerIdCirco];
-
-  if (candidateDepute) {
-    return candidateDepute;
-  } else {
-    let resDepute;
-    for (const depItem of deputes) {
-      // console.log("depItem.depute", depItem.depute);
-      const { num_deptmt, num_circo } = depItem.depute;
-      // console.log("num_deptmt", num_deptmt);
-      // console.log("num_circo", num_circo);
-      if (num_deptmt === layerNumDep && num_circo === layerNumCirco) {
-        // console.log("res", depItem.depute);
-        resDepute = depItem.depute;
-        layerToDepute[layerIdCirco] = resDepute;
-        break;
-      }
-    }
-
-    return resDepute;
-  }
 }
 
 function computeLegend(
@@ -314,7 +160,6 @@ async function initialiseMap() {
     deputes: DeputesType;
   };
 
-  // ["deputes"]
   const deputes = data.deputes.filter(
     (depItem) => depItem.depute.mandat_fin === "2024-06-09"
   );
@@ -325,9 +170,6 @@ async function initialiseMap() {
 
   // Draw circonscription area
   drawCirconscriptionArea(mymap, legendWk, deputes);
-
-  // // Setup legend filtered
-  // setLegendEffective(filterLegend());
 
   // Setup popup
   geoJsonLayer()?.bindPopup(function (layer) {
@@ -384,12 +226,6 @@ const App: Component = () => {
     document.addEventListener("keypress", keyStrokeHandler);
   });
 
-  // createEffect(() => {
-  //   if (circonscriptionLoadFinished()) {
-  //     updateCroppedLegend();
-  //   }
-  // });
-
   onCleanup(() => {
     document.removeEventListener("keypress", keyStrokeHandler);
   });
@@ -410,7 +246,7 @@ const App: Component = () => {
         <StatusBar message={statusBarMessage} />
       </Show>
       <Show when={displayLegend()}>
-        <Legend legend={legendEffective} />
+        <Legend />
       </Show>
     </div>
   );

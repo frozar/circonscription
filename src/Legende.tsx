@@ -1,13 +1,79 @@
 import styles from "./Legende.module.css";
-import { LegendType, regenerateColor } from "./App";
-import { Accessor, For } from "solid-js";
+import { deputes, geoJsonLayer, mymap, regenerateColor } from "./App";
+import { For, createEffect, createSignal } from "solid-js";
+import { LegendType } from "./type";
+import { findLayerDepute } from "./utils";
 
-export function Legend({
-  legend,
-}: {
-  legend: Accessor<LegendType | undefined>;
-}) {
-  if (!legend()) {
+export const [circonscriptionLoadFinished, setCirconscriptionLoadFinished] =
+  createSignal(false);
+
+export const [legend, setLegend] = createSignal<LegendType>();
+export const [legendEffective, setLegendEffective] = createSignal<LegendType>();
+
+export function filterLegend() {
+  // console.log("geoJsonLayer()", geoJsonLayer());
+  const resFilteredLegend: LegendType = {};
+  if (
+    circonscriptionLoadFinished() &&
+    geoJsonLayer() &&
+    legend() &&
+    deputes()
+  ) {
+    const mapBounds = mymap()!.getBounds();
+    for (const layer of geoJsonLayer()!.getLayers()) {
+      if (
+        mapBounds.contains(layer.getBounds()) ||
+        mapBounds.intersects(layer.getBounds())
+      ) {
+        // console.log("layer", layer);
+        // console.log("layer.getBounds()", layer.getBounds());
+        // console.log("mapBounds", mapBounds);
+        // console.log(
+        //   "mapBounds.contains",
+        //   mapBounds.contains(layer.getBounds())
+        // );
+        // console.log(
+        //   "mapBounds.intersects",
+        //   mapBounds.intersects(layer.getBounds())
+        // );
+
+        const resDepute = findLayerDepute(layer.feature.properties, deputes()!);
+
+        if (resDepute) {
+          resFilteredLegend[resDepute.parti_ratt_financier] =
+            legend()![resDepute.parti_ratt_financier];
+        }
+      }
+    }
+  }
+
+  return resFilteredLegend;
+}
+
+// Setup legend filtered when circonscription are loaded
+createEffect(() => {
+  if (circonscriptionLoadFinished()) {
+    setLegendEffective(filterLegend());
+  }
+});
+
+createEffect(() => {
+  // This line trigger the effect
+  legendEffective();
+
+  if (circonscriptionLoadFinished() && geoJsonLayer()) {
+    geoJsonLayer()!.setStyle(function (feature) {
+      const resDepute = findLayerDepute(feature?.properties, deputes()!);
+
+      return resDepute
+        ? { fillColor: legend()![resDepute.parti_ratt_financier] }
+        : { fillColor: "#FFFFFF" };
+    });
+  }
+});
+
+export function Legend() {
+  if (!legendEffective()) {
     return;
   }
 
@@ -16,10 +82,8 @@ export function Legend({
       <div class={styles.legend}>
         <h4 class={styles.legendTitle}>Légende</h4>
         <div class={styles.legendItems}>
-          <For each={Object.entries(legend()!)}>
+          <For each={Object.entries(legendEffective()!)}>
             {([parti, color]) => {
-              // console.log("parti", parti);
-              // console.log("color", color);
               return (
                 <div class={styles.legendItem}>
                   <div>
@@ -30,7 +94,6 @@ export function Legend({
                   </div>
                   <div>
                     <span class={styles.legendLabel}>{parti}</span>
-                    {/* <br /> */}
                   </div>
                 </div>
               );
