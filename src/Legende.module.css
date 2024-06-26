@@ -1,3 +1,11 @@
+.legendContainer {
+  z-index: 700;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  pointer-events: none;
+}
+
 .legend {
   padding: 6px 8px;
   /* background: white; */
@@ -37,4 +45,19 @@
 .legendLabel {
   /* position: relative;
   bottom: 3px; */
+}
+
+.buttonRegenerateContainer {
+  pointer-events: all;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.buttonRegenerate {
+  border: 1px solid black;
+  border-radius: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
 }

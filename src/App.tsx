@@ -28,7 +28,7 @@ import {
   DEFAULT_CIRCONSCRIPTION_OPACITY,
   NB_CIRCONSCRIPTION,
 } from "./constant";
-import { removeLegend, updateLegend } from "./Legende";
+import { Legend } from "./Legende";
 
 type PartiRattFinancierType = string;
 
@@ -59,7 +59,7 @@ const [legend, setLegend] = createSignal<LegendType>();
 const [legendEffective, setLegendEffective] = createSignal<LegendType>();
 const [deputes, setDeputes] = createSignal<DeputesType>();
 const [mymap, setMymap] = createSignal<L.Map>();
-export const [legendDisplayed, setLegendDisplayed] = createSignal(false);
+export const [displayLegend, setDisplayLegend] = createSignal(false);
 
 const [nbCirconscriptionLoaded, setNbCirconscriptionLoaded] = createSignal(0);
 const [circonscriptionLoadFinished, setCirconscriptionLoadFinished] =
@@ -146,14 +146,14 @@ createEffect(() => {
 
 // console.log("legendEffective", legendEffective());
 
-// Bind area color to new color when the legend update
-createEffect(() => {
-  if (!legendDisplayed()) {
-    removeLegend();
-  } else if (legendDisplayed() && legendEffective() && mymap()) {
-    updateLegend(mymap()!, legendEffective()!);
-  }
-});
+// // Bind area color to new color when the legend update
+// createEffect(() => {
+//   if (!displayLegend()) {
+//     removeLegend();
+//   } else if (displayLegend() && legendEffective() && mymap()) {
+//     updateLegend(mymap()!, legendEffective()!);
+//   }
+// });
 
 createEffect(() => {
   // This line trigger the effect
@@ -333,7 +333,6 @@ async function initialiseMap() {
   geoJsonLayer()?.bindPopup(function (layer) {
     const resDepute = findLayerDepute(layer.feature.properties, deputes);
 
-    // TODO: add link to depute website
     return (
       <div>
         <p>{layer.feature.properties.libelle}</p>
@@ -347,58 +346,34 @@ async function initialiseMap() {
 
   mymap.on("zoomend", () => {
     setLegendEffective(filterLegend());
-    // console.log("ZoomEnd");
   });
 
   mymap.on("moveend", () => {
     setLegendEffective(filterLegend());
-    // console.log("MoveEnd");
   });
 
   return mymap;
 }
 
+export function regenerateColor() {
+  setLegend((currentLegend) => {
+    if (!currentLegend) {
+      return {};
+    }
+    const res: LegendType = {};
+    for (const parti of Object.keys(currentLegend)) {
+      res[parti] = generateRandomHexColor();
+    }
+    return res;
+  });
+}
+
 function keyStrokeHandler(event: KeyboardEvent) {
   const code = event.code;
   if (code === "Space") {
-    setLegend((currentLegend) => {
-      if (!currentLegend) {
-        return {};
-      }
-      const res: LegendType = {};
-      for (const parti of Object.keys(currentLegend)) {
-        res[parti] = generateRandomHexColor();
-      }
-      return res;
-    });
+    regenerateColor();
   }
 }
-
-// function updateCroppedLegend() {
-//   console.log("geoJsonLayer()", geoJsonLayer());
-//   // console.log("geoJsonLayer()?.getLayers()", geoJsonLayer()?.getLayers());
-//   if (geoJsonLayer()) {
-//     const mapBounds = mymap()!.getBounds();
-//     for (const layer of geoJsonLayer()!.getLayers()) {
-//       if (
-//         mapBounds.contains(layer.getBounds()) ||
-//         mapBounds.intersects(layer.getBounds())
-//       ) {
-//         console.log("layer", layer);
-//         console.log("layer.getBounds()", layer.getBounds());
-//         console.log("mapBounds", mapBounds);
-//         console.log(
-//           "mapBounds.contains",
-//           mapBounds.contains(layer.getBounds())
-//         );
-//         console.log(
-//           "mapBounds.intersects",
-//           mapBounds.intersects(layer.getBounds())
-//         );
-//       }
-//     }
-//   }
-// }
 
 const App: Component = () => {
   onMount(async () => {
@@ -431,7 +406,12 @@ const App: Component = () => {
           geoJsonLayer={geoJsonLayer()!}
         />
       </Show>
-      <StatusBar show={displaySpinningWheel} message={statusBarMessage} />
+      <Show when={displaySpinningWheel()}>
+        <StatusBar message={statusBarMessage} />
+      </Show>
+      <Show when={displayLegend()}>
+        <Legend legend={legendEffective} />
+      </Show>
     </div>
   );
 };

@@ -1,11 +1,5 @@
 @import "./SideMenuRoot.css";
 
-/* .sideMenuRoot {
-  --side-menu-width: 250px;
-  --menu-burger-size: 40px;
-  pointer-events: none;
-} */
-
 .sideMenuBackground {
   background: #fff0;
 }
@@ -26,8 +20,6 @@
 .sideMenuOpened {
   composes: sideMenu;
   left: 0;
-  /* width: 300px;
-  max-width: 66%; */
 }
 
 .menuBurgerContainer {
@@ -41,7 +33,7 @@
   display: flex;
   justify-content: flex-end;
   transition: all 0.2s;
-  pointer-events: all;
+  pointer-events: none;
 }
 
 .menuBurgerContainerOpened {

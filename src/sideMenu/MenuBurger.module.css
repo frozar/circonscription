@@ -2,9 +2,7 @@
 
 .menuBurgerButton {
   width: var(--menu-burger-size);
-  /* background: #666;
-  border-radius: 9999px;
-  border: 1px solid black; */
+  pointer-events: all;
   background: #333a;
   transition: all 0.2s;
 }

@@ -7,7 +7,7 @@ import {
   DEFAULT_CIRCONSCRIPTION_OPACITY,
 } from "../constant";
 import { Slider } from "./Slider";
-import { legendDisplayed, setLegendDisplayed } from "../App";
+import { displayLegend, setDisplayLegend } from "../App";
 import { createSignal } from "solid-js";
 
 export function AffichageSettings({
@@ -51,7 +51,7 @@ export function AffichageSettings({
       <div
         class={styles.controlCheckbox}
         onClick={() => {
-          setLegendDisplayed((displayed) => {
+          setDisplayLegend((displayed) => {
             return !displayed;
           });
         }}
@@ -59,7 +59,7 @@ export function AffichageSettings({
         <input
           class={styles.legendCheckbox}
           type="checkbox"
-          checked={legendDisplayed()}
+          checked={displayLegend()}
         />
         <span class={styles.legendLabel}>Afficher la légende</span>
       </div>
