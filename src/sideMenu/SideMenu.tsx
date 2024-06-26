@@ -13,7 +13,7 @@ export function SideMenu({
   backgroundLayer: TileLayer;
   geoJsonLayer: GeoJSON<any, Geometry>;
 }) {
-  const [sideMenuOpened, setSideMenuOpened] = createSignal(true);
+  const [sideMenuOpened, setSideMenuOpened] = createSignal(false);
 
   return (
     <div class={styles.sideMenuRoot}>
