@@ -1,0 +1,21 @@
+.copyrightContainer {
+  position: absolute;
+  z-index: 1000;
+  left: 0px;
+  bottom: 0px;
+  /* width: 100%; */
+  background: #fffa;
+}
+
+.copyrightInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  text-decoration: none;
+}
+
+.copyrightTitle {
+  font-size: small;
+}

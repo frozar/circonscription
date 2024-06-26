@@ -1,6 +1,5 @@
 import {
   Show,
-  createEffect,
   createSignal,
   onCleanup,
   onMount,
@@ -37,6 +36,7 @@ import {
 } from "./Legende";
 import { DeputeType, DeputesType, LegendType } from "./type";
 import { findLayerDepute } from "./utils";
+import { Copyright } from "./Copyright";
 
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
@@ -177,10 +177,17 @@ async function initialiseMap() {
 
     return (
       <div>
-        <p>{layer.feature.properties.libelle}</p>
+        <p class={styles.popupParagraphe}>{layer.feature.properties.libelle}</p>
         <Show when={resDepute}>
-          <p>{resDepute.nom}</p>
-          <p>{resDepute.parti_ratt_financier}</p>
+          {/* <p class={styles.popupParagrapheMention}>Ancien député</p> */}
+          <p class={styles.popupParagraphe}>
+            <span class={styles.popupParagrapheMention}>Ancien député :</span>{" "}
+            <span>{resDepute.nom}</span>
+          </p>
+          <p class={styles.popupParagraphe}>
+            <span class={styles.popupParagrapheMention}>Parti politique :</span>{" "}
+            <span>{resDepute.parti_ratt_financier}</span>
+          </p>
         </Show>
       </div>
     );
@@ -248,6 +255,7 @@ const App: Component = () => {
       <Show when={displayLegend()}>
         <Legend />
       </Show>
+      <Copyright />
     </div>
   );
 };

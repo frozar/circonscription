@@ -22,3 +22,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+html .leaflet-popup-content p {
+  /* margin: unset; */
+  margin: 4px 0px;
+
+  /* margin: 1.3em 0; */
+}
