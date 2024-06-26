@@ -1,3 +1,7 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics, logEvent } from "firebase/analytics";
+
 import {
   Show,
   createSignal,
@@ -37,6 +41,18 @@ import {
 import { DeputeType, DeputesType, LegendType } from "./type";
 import { findLayerDepute } from "./utils";
 import { Copyright } from "./Copyright";
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCSH5rtsfvNzAfowzjiPYdZbcvlnDR48fY",
+  authDomain: "circonscription-19b33.firebaseapp.com",
+  projectId: "circonscription-19b33",
+  storageBucket: "circonscription-19b33.appspot.com",
+  messagingSenderId: "309952758105",
+  appId: "1:309952758105:web:20d28c4d6c807b1f19cc48",
+  measurementId: "G-11W0V2BB4F",
+};
 
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
@@ -226,6 +242,13 @@ function keyStrokeHandler(event: KeyboardEvent) {
 
 const App: Component = () => {
   onMount(async () => {
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    // Initialize Analytics and get a reference to the service
+    const analytics = getAnalytics(app);
+    logEvent(analytics, "application_mounted");
+
     const mymap = await initialiseMap();
 
     window.mymap = mymap;
