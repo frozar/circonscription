@@ -21,7 +21,7 @@ export function AffichageSettings({
 
   return (
     <div class={styles.controlRoot}>
-      <h3>Affichage</h3>
+      <h3 class={styles.controlTitle}>Affichage</h3>
       <div class={styles.controlSlider}>
         <p>Opacité fond de carte</p>
         <div class={styles.sliderContainer}>

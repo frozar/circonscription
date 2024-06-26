@@ -13,7 +13,7 @@
   position: absolute;
   transition: all 0.2s;
   width: var(--side-menu-width);
-  max-width: 66%;
+  /* max-width: 66%; */
   left: calc(-1 * var(--side-menu-width));
 }
 
@@ -51,11 +51,11 @@
 .menuContentInner {
   margin-top: var(--menu-burger-size);
   margin-bottom: 20px;
-  padding: 20px 10px;
+  padding: 15px 10px;
 }
 
 .menuControlContainer {
-  padding: 20px;
+  padding: 10px 15px;
   background: #fffb;
   border-radius: 8px;
   box-shadow: 0 5px 6px 0 rgba(0, 0, 0, 0.2), 0 6px 15px 0 rgba(0, 0, 0, 0.19) !important;

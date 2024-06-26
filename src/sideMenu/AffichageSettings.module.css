@@ -1,9 +1,14 @@
 .controlRoot {
-  --control-margin-top: 15px;
+  --control-margin-top: 10px;
+}
+
+.controlTitle {
+  font-size: 16px;
 }
 
 .controlSlider {
   margin-top: var(--control-margin-top);
+  font-size: 14px;
 }
 
 .sliderContainer {
@@ -13,6 +18,7 @@
 .controlCheckbox {
   margin-top: var(--control-margin-top);
   cursor: pointer;
+  font-size: 14px;
 }
 
 .legendCheckbox {

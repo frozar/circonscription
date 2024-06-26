@@ -1,5 +1,5 @@
 .sideMenuRoot {
-  --side-menu-width: 250px;
+  --side-menu-width: 220px;
   --menu-burger-size: 30px;
   pointer-events: none;
 }
