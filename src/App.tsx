@@ -45,14 +45,16 @@ import { Copyright } from "./Copyright";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCSH5rtsfvNzAfowzjiPYdZbcvlnDR48fY",
-  authDomain: "circonscription-19b33.firebaseapp.com",
-  projectId: "circonscription-19b33",
-  storageBucket: "circonscription-19b33.appspot.com",
-  messagingSenderId: "309952758105",
-  appId: "1:309952758105:web:20d28c4d6c807b1f19cc48",
-  measurementId: "G-11W0V2BB4F",
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
+
+console.log(import.meta.env);
 
 const [displaySpinningWheel, setDisplaySpinningWheel] = createSignal(true);
 const [backgroundLayer, setBackgroundLayer] = createSignal<TileLayer>();
